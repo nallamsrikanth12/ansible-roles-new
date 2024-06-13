@@ -37,6 +37,7 @@
   ansible.builtin.template:
     src: roles/backend/templates/backend.service.j2
     dest: /etc/systemd/system/backend.service
+    remote_src: yes
 
 - name: import data into mysql
   community.mysql.mysql_db:
@@ -50,6 +51,7 @@
 - name: daemon reload
   ansible.builtin.systemd:
     daemon_reload: yes
+
 
 - name: start and enable backend service
   ansible.builtin.service:
