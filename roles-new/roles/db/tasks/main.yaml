@@ -3,7 +3,7 @@
     name: mysql
     state: latest
 
-- name: start and enabled the mysql server
+- name: start and enable the mysql server
   ansible.builtin.service:
     name: mysqld
     state: started
@@ -12,22 +12,23 @@
 - name: install the python libraries and dependencies
   ansible.builtin.pip:
     name:
-    - pymysql
-    - cryptography
+      - pymysql
+      - cryptography
     executable: pip3.9
 
 - name: check db connection
   community.mysql.mysql_info:
-    login_host: 
+    login_host: "{{ login_host }}"
     login_user: root
-    login_password: 
+    login_password: "{{ mysql_root_password }}"
     filter: version
   ignore_errors: yes
   register: mysql_connection_output
 
 - name: print the information
   ansible.builtin.debug:
-  msg: "output: {{mysql_connection_output}}"
+    msg: "output: {{ mysql_connection_output }}"
+
 
 # - name: setup the root password
 #   ansible.builtin.command: "mysql_secure_installation --set-root-pass {{ mysql_root_password }}"
