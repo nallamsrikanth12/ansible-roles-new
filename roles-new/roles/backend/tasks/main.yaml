@@ -1,58 +1,63 @@
-- name: disable the nodejs
+- name: disable default nodejs
   ansible.builtin.command: dnf module disable nodejs -y
 
-- name: enable the nodejs:20
+- name: enable nodejs:20
   ansible.builtin.command: dnf module enable nodejs:20 -y
 
-- name: install the nodejs and mysql
-  ansible.builtin.dnf:
+- name: install nodejs
+  ansible.builtin.dnf: # only works for Redhat family
     name: "{{ item }}"
-    state: latest
+    state: installed
   loop:
-    - nodejs
-    - mysql
+  - nodejs
+  - mysql
 
-- name: install dependencies and libraries like pymysql
-  ansible.builtin.pip:
-    name:
-      - pymysql
-      - cryptography
-    executable: pip3.9
-
-- name: create a user
+- name: create expense user
   ansible.builtin.user:
     name: expense
 
-- name: run app-pre-req
+- name: run app pre-requisites
+  tags:
+  - deployment
   ansible.builtin.import_role:
     name: common
     tasks_from: app-pre-req
 
-- name: install npm packages
-  ansible.builtin.command: "npm install"
+- name: install npm dependencies
+  tags:
+  - deployment
+  ansible.builtin.command: npm install
   args:
     chdir: /app
 
-- name: copy the backend.service
+- name: copy backend service
   ansible.builtin.template:
     src: backend.service.j2
     dest: /etc/systemd/system/backend.service
 
+- name: install python mysql dependencies
+  ansible.builtin.pip: 
+    name:
+    - PyMySQL # to connect MySQL DB from Ansible
+    - cryptography
+    executable: pip3.9 # pip3.11 if python version is 3.11
+
 - name: import data into mysql
   community.mysql.mysql_db:
-    login_host: db.srikantheswar.online
-    login_user: root  # or the appropriate MySQL user
-    login_password: "{{mysql_root_password}}"
+    login_user: root
+    login_password: "{{ login_password }}"
+    login_host: "{{ login_host }}"
+    target: /app/schema/backend.sql
     state: import
     name: all
-    target: /app/schema/backend.sql
 
 - name: daemon reload
-  ansible.builtin.systemd:
-    daemon_reload: yes
-
+  ansible.builtin.systemd_service:
+    daemon_reload: true
 
 - name: start and enable backend service
+  tags: 
+  - deployment
   ansible.builtin.service:
     name: backend
     state: restarted
