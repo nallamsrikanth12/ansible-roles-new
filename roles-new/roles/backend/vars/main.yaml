@@ -2,4 +2,4 @@ DB_HOST: "db.srikantheswar.online"
 
 login_host: "db.srikantheswar.online"
 
-login_password: "mysql_root_password"
+mysql_root_password: "ExpenseApp1"
