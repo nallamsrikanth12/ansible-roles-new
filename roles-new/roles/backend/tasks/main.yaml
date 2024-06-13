@@ -1,8 +1,8 @@
 - name: disable the nodejs
-  anisible.builtin.command: "dnf module disable nodejs -y"
+  anisible.builtin.command: dnf module disable nodejs -y
 
 - name: enable the nodejs:20
-  anisible.builtin.command: "dnf module enable nodejs:20 -y"
+  anisible.builtin.command: dnf module enable nodejs:20 -y
 
 - name: install the nodejs
   ansible.builtin.dnf:
